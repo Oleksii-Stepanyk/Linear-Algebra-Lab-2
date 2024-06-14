@@ -1,4 +1,3 @@
-from calendar import c
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.image import imread
@@ -74,6 +73,8 @@ print("Cumulative variance: ", cumulative)
 
 components = np.argmax(cumulative > 0.95) + 1
 print("Components(95%): ", components)
+
+compress_image(image_bw, components)
 
 compress_image(image_bw, 15)
 compress_image(image_bw, 35)
