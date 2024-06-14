@@ -26,29 +26,33 @@ def eigen(matrix):
 
 
 def get_sorted_eigenvalues(matrix):
-    std_matrix = standartization(image_bw)
-    cov_matrix = covariance(std_matrix)
-    eigenvalues, eigenvectors = eigen(cov_matrix)
-    return sort_eigenvalues(eigenvalues)
-
-
-def standartization(matrix):
     mean = np.mean(matrix)
     std = np.std(matrix)
-    return (matrix - mean) / std
-
-
-def covariance(matrix):
-    return np.cov(matrix)
-
-
-def sort_eigenvalues(eigenvalues):
+    std_matrix = (matrix - mean) / std
+    cov_matrix = np.cov(std_matrix)
+    eigenvalues, _ = eigen(cov_matrix)
     index = np.argsort(eigenvalues)[::-1]
     return eigenvalues[index]
 
 
-def cumulative_variance(eigenvalues):
-    return np.cumsum(eigenvalues) / np.sum(eigenvalues)
+def encrypt_message(message, key_matrix):
+    message_vector = np.array([ord(char) for char in message])
+    eigenvalues, eigenvectors = np.linalg.eig(key_matrix)
+    diagonalized_key_matrix = np.dot(
+        np.dot(eigenvectors, np.diag(eigenvalues)), np.linalg.inv(eigenvectors)
+    )
+    encrypted_vector = np.dot(diagonalized_key_matrix, message_vector)
+    return encrypted_vector
+
+
+def decrypt_message(encrypted_vector, key_matrix):
+    eigenvalues, eigenvectors = np.linalg.eig(key_matrix)
+    diagonalized_key_matrix = np.dot(
+        np.dot(eigenvectors, np.diag(eigenvalues)), np.linalg.inv(eigenvectors)
+    )
+    decrypted_vector = np.dot(np.linalg.inv(diagonalized_key_matrix), encrypted_vector)
+    decrypted_message = "".join([chr(int(np.round(ch))) for ch in decrypted_vector])
+    return decrypted_message
 
 
 eigenvalues, eigenvectors = eigen(matrix)
@@ -68,7 +72,7 @@ plt.imshow(image_bw, cmap="gray")
 plt.show()
 
 eigenvalues = get_sorted_eigenvalues(image_bw)
-cumulative = cumulative_variance(eigenvalues)
+cumulative = np.cumsum(eigenvalues) / np.sum(eigenvalues)
 print("Cumulative variance: ", cumulative)
 
 components = np.argmax(cumulative > 0.95) + 1
@@ -82,3 +86,10 @@ compress_image(image_bw, 75)
 compress_image(image_bw, 150)
 compress_image(image_bw, 200)
 compress_image(image_bw, 250)
+
+message = "Hello, World!"
+key_matrix = np.random.randint(0, 256, (len(message), len(message)))
+encrypted_message = encrypt_message(message, key_matrix)
+print("Encrypted message:", encrypted_message)
+decrypted_message = decrypt_message(encrypted_message, key_matrix)
+print("Decrypted message:", decrypted_message)
