@@ -74,8 +74,18 @@ plt.show()
 eigenvalues = get_sorted_eigenvalues(image_bw)
 cumulative = np.cumsum(eigenvalues) / np.sum(eigenvalues)
 print("Cumulative variance: ", cumulative)
+cumulative = cumulative * 100
 
-components = np.argmax(cumulative > 0.95) + 1
+plt.plot(cumulative)
+plt.plot([-15, 750], [95, 95], "r--")
+plt.plot([140, 139], [-15, 105], "g--")
+plt.xlim(-15, 750)
+plt.ylim(-15, 105)
+plt.xlabel("Number of components")
+plt.ylabel("Cumulative explained variance")
+plt.title("Cumulative explained variance by components")
+
+components = np.argmax(cumulative > 95) + 1
 print("Components(95%): ", components)
 
 compress_image(image_bw, components)
